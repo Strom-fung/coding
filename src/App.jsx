@@ -1,221 +1,267 @@
-// ============================================================
-//  Personal Link-in-Bio 主页
-//  修改说明：找到对应的 "TODO:" 注释，替换为你的真实信息即可
-// ============================================================
-
 import { useState } from 'react'
+import './App.css'
 
-// TODO: 替换为你的头像图片地址（可以用网络图片或本地 public/ 目录下的文件）
-const AVATAR_URL = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Strom&backgroundColor=0a0a0a'
-// TODO: 替换为你的名字
-const NAME = 'Strom Fung'
-// TODO: 替换为你的简介/标签语
-const BIO = '全栈开发 · 开源爱好者 · 热爱折腾新技术'
+// Mock AI summary generator
+function generateSummary(text) {
+  const lines = text.split('\n').filter(l => l.trim())
+  const participants = []
+  const mentions = []
 
-// TODO: 替换/增删你的社交链接卡片
-// label: 显示文字  url: 点击跳转地址  icon: emoji 图标  gradient: 卡片渐变色起点
-const LINKS = [
-  {
-    label: 'GitHub',
-    url: 'https://github.com/Strom-fung',
-    icon: '💻',
-    gradient: 'from-indigo-600 to-purple-600',
-  },
-  {
-    label: 'LinkedIn',
-    url: 'https://linkedin.com/in/stromfung',
-    icon: '🔗',
-    gradient: 'from-blue-600 to-cyan-500',
-  },
-  {
-    label: 'Email',
-    url: 'mailto:strom@example.com',
-    icon: '📧',
-    gradient: 'from-red-500 to-orange-500',
-  },
-  {
-    label: '微信',
-    url: 'weixin://',
-    icon: '💬',
-    gradient: 'from-green-500 to-emerald-600',
-  },
-  {
-    label: '个人博客',
-    url: 'https://blog.example.com',
-    icon: '✍️',
-    gradient: 'from-yellow-500 to-amber-600',
-  },
-  {
-    label: 'Twitter / X',
-    url: 'https://twitter.com/stromfung',
-    icon: '🐦',
-    gradient: 'from-sky-500 to-blue-500',
-  },
-  {
-    label: '小红书',
-    url: 'https://www.xiaohongshu.com/user/profile/stromfung',
-    icon: '📕',
-    gradient: 'from-pink-500 to-rose-500',
-  },
-  {
-    label: 'Bilibili',
-    url: 'https://space.bilibili.com/stromfung',
-    icon: '📺',
-    gradient: 'from-pink-500 to-purple-600',
-  },
-]
+  // Extract potential participants (lines starting with names followed by colon)
+  lines.forEach(line => {
+    const match = line.match(/^([A-Za-z\u4e00-\u9fa5]{2,6})[:：]/)
+    if (match && !participants.includes(match[1])) {
+      participants.push(match[1])
+    }
+  })
 
-// 社交链接卡片组件
-function LinkCard({ link, index }) {
-  const [hovered, setHovered] = useState(false)
+  // Simulated structured summary
+  const mockSummary = `## 📋 会议摘要
 
-  return (
-    <a
-      href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group relative flex items-center gap-4 px-5 py-4 rounded-2xl border border-white/10 overflow-hidden transition-all duration-300 hover:border-white/20 hover:scale-[1.02] hover:shadow-2xl cursor-pointer"
-      style={{
-        background: hovered
-          ? `linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)`
-          : `linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)`,
-        animationDelay: `${index * 60}ms`,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* 左侧渐变装饰条 */}
-      <div
-        className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-l-full bg-gradient-to-b ${link.gradient} transition-all duration-300 ${hovered ? 'opacity-100' : 'opacity-0'}`}
-      />
+### 🎯 核心要点
+${lines.slice(0, 3).map((l, i) => `• ${l.replace(/^[^\s：:]+[:：]\s*/, '').slice(0, 80)}...`).join('\n') || '• 会议已记录，等待内容分析'}
 
-      {/* 图标 */}
-      <div
-        className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-transform duration-300 ${hovered ? 'scale-110' : ''}`}
-        style={{
-          background: `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)`,
-        }}
-      >
-        {link.icon}
-      </div>
+### 📝 讨论事项
+${lines.filter(l => l.includes('讨论') || l.includes('问题') || l.includes('议题')).map(l => `• ${l.slice(0, 100)}`).join('\n') || lines.slice(2, 6).map(l => `• ${l.slice(0, 100)}`).join('\n')}
 
-      {/* 文字 */}
-      <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium text-white/90 group-hover:text-white transition-colors duration-200">
-          {link.label}
-        </span>
-      </div>
+### ✅ 待办事项
+${lines.filter(l => l.includes('待办') || l.includes('TODO') || l.includes('任务') || l.includes('完成')).map(l => `• ${l.replace(/^[^\s：:]+[:：]\s*/, '')}`).join('\n') || '• [负责人] - [具体事项] - 截止日期'}
 
-      {/* 右侧箭头 */}
-      <div
-        className={`flex-shrink-0 text-white/30 group-hover:text-white/60 transition-all duration-300 ${hovered ? 'translate-x-1' : ''}`}
-      >
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
-    </a>
-  )
+### ✅ 决策记录
+${lines.filter(l => l.includes('决定') || l.includes('决策') || l.includes('通过') || l.includes('同意')).map(l => `• ${l.replace(/^[^\s：:]+[:：]\s*/, '')}`).join('\n') || '• [决策事项描述] - 决策依据'}
+
+### 👥 参会人员
+${participants.length > 0 ? participants.map(p => `- ${p}`).join('\n') : '- 待补充'}
+
+---
+*由 Meeting Summary Bot 生成 | ${new Date().toLocaleDateString('zh-CN')}*`
+
+  return mockSummary
 }
 
-// 头像组件
-function Avatar() {
+function App() {
+  const [input, setInput] = useState('')
+  const [summary, setSummary] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const handleGenerate = async () => {
+    if (!input.trim()) return
+    setLoading(true)
+    setSummary('')
+
+    // Simulate API call delay
+    await new Promise(r => setTimeout(r, 1200))
+
+    const result = generateSummary(input)
+    setSummary(result)
+    setLoading(false)
+  }
+
+  const handleCopy = async () => {
+    if (!summary) return
+    try {
+      await navigator.clipboard.writeText(summary)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback
+      const ta = document.createElement('textarea')
+      ta.value = summary
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const handleClear = () => {
+    setInput('')
+    setSummary('')
+    setCopied(false)
+  }
+
+  const handleSample = () => {
+    setInput(`会议主题：产品迭代计划评审会
+时间：2025年6月3日 14:00-15:30
+参会人：张三、李四、王五、赵六
+
+张三：回顾上周工作进度，重点介绍了用户增长模块的A/B测试结果。
+
+李四：目前转化率提升约12%，但留存率仍有波动，需要进一步分析。
+
+王五：建议下周开始推进支付流程优化，相关需求文档已评审通过。
+
+讨论：关于新功能的灰度发布策略，大家一致同意先从10%流量开始测试。
+
+决定：支付模块优化优先级调高，本周五前完成开发评审。
+
+待办：
+- 李四：完成留存数据详细分析报告（周三前）
+- 王五：支付流程UI设计方案优化（周四前）
+- 赵六：协调后端资源排期（周三前）
+
+张三：下次评审会定于下周一上午10点。`)
+  }
+
   return (
-    <div className="relative inline-block">
-      {/* 外圈光晕 */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 blur-xl opacity-30 animate-pulse" />
-      {/* 头像主体 */}
-      <div className="relative w-28 h-28 rounded-full overflow-hidden ring-2 ring-white/10 ring-offset-2 ring-offset-[#09090b]">
-        <img
-          src={AVATAR_URL}
-          alt={NAME}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.style.display = 'none'
-            e.target.parentElement.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)'
-          }}
-        />
-      </div>
-      {/* 在线状态指示点 */}
-      <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[#09090b] shadow-lg shadow-green-500/50" />
-    </div>
-  )
-}
-
-// 底部 Footer
-function Footer() {
-  return (
-    <footer className="mt-12 text-center text-xs text-white/20">
-      <p>Built with ❤️ · {new Date().getFullYear()}</p>
-    </footer>
-  )
-}
-
-// 主应用
-export default function App() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
-
-      {/* 背景装饰 */}
-      <div className="fixed inset-0 pointer-events-none">
-        {/* 顶部大光斑 */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-600/10 blur-3xl" />
-        <div className="absolute -top-20 right-10 w-72 h-72 rounded-full bg-purple-600/8 blur-3xl" />
-        {/* 底部光斑 */}
-        <div className="absolute -bottom-40 right-20 w-80 h-80 rounded-full bg-pink-600/8 blur-3xl" />
-        <div className="absolute bottom-20 -left-20 w-64 h-64 rounded-full bg-blue-600/8 blur-3xl" />
-      </div>
-
-      {/* 内容区域 */}
-      <div className="relative z-10 w-full max-w-md">
-
-        {/* 头像 + 名字 */}
-        <div className="flex flex-col items-center mb-10 animate-fade-in-up">
-          <Avatar />
-          <h1 className="mt-5 text-2xl font-bold text-white tracking-tight">
-            {NAME}
-          </h1>
-          <p className="mt-2 text-sm text-white/50 font-medium">
-            {BIO}
-          </p>
-
-          {/* 社交小图标行（可选装饰） */}
-          <div className="mt-4 flex items-center gap-3">
-            {[
-              { icon: '💻', href: LINKS[0]?.url || '#', label: 'GitHub' },
-              { icon: '🔗', href: LINKS[1]?.url || '#', label: 'LinkedIn' },
-              { icon: '📧', href: LINKS[2]?.url || '#', label: 'Email' },
-            ].map((item, i) => (
-              <a
-                key={i}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-base text-white/40 hover:text-white hover:bg-white/10 transition-all duration-200 hover:scale-110"
-                title={item.label}
-              >
-                {item.icon}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* 链接卡片列表 */}
-        <div className="flex flex-col gap-3">
-          {LINKS.map((link, index) => (
-            <div
-              key={index}
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${100 + index * 60}ms` }}
-            >
-              <LinkCard link={link} index={index} />
+    <div className="min-h-screen bg-[#0f1117] text-gray-200">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-[#16181f]">
+        <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl">📝</div>
+            <div>
+              <h1 className="text-lg font-bold text-white">会议纪要助手</h1>
+              <p className="text-xs text-gray-500">Meeting Summary Bot</p>
             </div>
-          ))}
+          </div>
+          <button
+            onClick={handleSample}
+            className="text-xs px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-gray-300 transition"
+          >
+            示例文本
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-6 py-8">
+        {/* Input Section */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium text-gray-400">
+              📄 粘贴会议记录
+            </label>
+            <span className="text-xs text-gray-600">
+              {input.length} 字符
+            </span>
+          </div>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder={`粘贴会议记录文本...
+
+示例格式：
+会议主题：xxx
+时间：xxx
+参会人：xxx
+
+张三：发言内容...
+李四：发言内容...
+...
+`}
+            className="w-full h-64 bg-[#1a1d27] border border-gray-700 rounded-xl p-4 text-sm text-gray-200 placeholder-gray-600 resize-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition"
+          />
+        </section>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3 mb-8">
+          <button
+            onClick={handleGenerate}
+            disabled={!input.trim() || loading}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium transition shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                生成摘要中...
+              </>
+            ) : (
+              <>
+                ✨ 生成摘要
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleClear}
+            disabled={!input && !summary}
+            className="px-5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 disabled:bg-gray-900 disabled:text-gray-600 text-gray-300 font-medium transition"
+          >
+            清空
+          </button>
         </div>
 
-        {/* Footer */}
-        <Footer />
-      </div>
+        {/* Summary Output */}
+        {summary && (
+          <section className="border border-gray-700 rounded-2xl overflow-hidden bg-[#1a1d27]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700 bg-[#16181f]">
+              <div className="flex items-center gap-2">
+                <span className="text-indigo-400">📋</span>
+                <h2 className="text-sm font-medium text-gray-300">结构化摘要</h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600 hidden sm:block">Markdown 格式</span>
+                <button
+                  onClick={handleCopy}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                    copied
+                      ? 'bg-green-500/20 text-green-400'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      已复制
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      复制
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="p-5">
+              <pre className="whitespace-pre-wrap text-sm text-gray-300 leading-relaxed font-mono" style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace" }}>
+                {summary}
+              </pre>
+            </div>
+          </section>
+        )}
+
+        {/* Features */}
+        {!summary && (
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
+            <div className="p-5 rounded-xl bg-[#1a1d27] border border-gray-800">
+              <div className="text-2xl mb-2">🎯</div>
+              <h3 className="text-sm font-medium text-gray-300 mb-1">智能提取要点</h3>
+              <p className="text-xs text-gray-600">自动识别会议核心议题和关键讨论点</p>
+            </div>
+            <div className="p-5 rounded-xl bg-[#1a1d27] border border-gray-800">
+              <div className="text-2xl mb-2">✅</div>
+              <h3 className="text-sm font-medium text-gray-300 mb-1">待办与决策</h3>
+              <p className="text-xs text-gray-600">清晰区分待办事项和会议决策</p>
+            </div>
+            <div className="p-5 rounded-xl bg-[#1a1d27] border border-gray-800">
+              <div className="text-2xl mb-2">📋</div>
+              <h3 className="text-sm font-medium text-gray-300 mb-1">一键复制</h3>
+              <p className="text-xs text-gray-600">生成 Markdown 格式，方便粘贴分享</p>
+            </div>
+          </section>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-800 mt-12">
+        <div className="max-w-5xl mx-auto px-6 py-5 text-center">
+          <p className="text-xs text-gray-600">
+            Built with React + Vite + Tailwind CSS · Powered by AI
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
+
+export default App
